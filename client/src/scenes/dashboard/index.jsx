@@ -1,10 +1,10 @@
 import React from "react";
 import {
   DownloadOutlined,
-  Email,
-  PointOfSale,
-  PersonAdd,
-  Traffic,
+  Nature,
+  TrendingUp,
+  Assessment,
+  LocalFlorist,
 } from "@mui/icons-material";
 import {
   Box,
@@ -40,9 +40,9 @@ const Dashboard = () => {
       flex: 1,
     },
     {
-      field: "userId",
-      headerName: "User ID",
-      flex: 0.5,
+      field: "projectName",
+      headerName: "Project Name",
+      flex: 1,
     },
     {
       field: "createdAt",
@@ -50,17 +50,16 @@ const Dashboard = () => {
       flex: 1,
     },
     {
-      field: "products",
-      headerName: "# of Products",
+      field: "impactScore",
+      headerName: "Impact Score",
       flex: 0.5,
-      sortable: false,
-      renderCell: (params) => params.value.length,
+      renderCell: (params) => params.value,
     },
     {
-      field: "cost",
-      headerName: "Cost",
-      flex: 1,
-      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
+      field: "status",
+      headerName: "Status",
+      flex: 0.5,
+      renderCell: (params) => params.value,
     },
   ];
 
@@ -68,7 +67,7 @@ const Dashboard = () => {
     <Box m="1.5rem 2.5rem">
       <FlexBetween>
         {/* Header */}
-        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+        <Header title="SUSTAINABILITY DASHBOARD" subtitle="Welcome to Elisa's Sustainability Dashboard" />
 
         {/* Content */}
         <Box>
@@ -80,7 +79,6 @@ const Dashboard = () => {
               fontSize: "14px",
               fontWeight: "bold",
               padding: "10px 20px",
-
               "&:hover": {
                 backgroundColor: theme.palette.background.alt,
                 color: theme.palette.secondary.light,
@@ -88,7 +86,7 @@ const Dashboard = () => {
             }}
           >
             <DownloadOutlined sx={{ mr: "10px" }} />
-            Download Reports
+            Download Sustainability Reports
           </Button>
         </Box>
       </FlexBetween>
@@ -106,27 +104,27 @@ const Dashboard = () => {
         }}
       >
         {/* ROW 1 */}
-        {/* Total Customers */}
+        {/* Total Projects */}
         <StatBox
-          title="Total Customers"
-          value={data && data.totalCustomers}
+          title="Active Projects"
+          value={data && data.totalProjects}
           increase="+14%"
           description="Since last month"
           icon={
-            <Email
+            <Nature
               sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
 
-        {/* Sales Today */}
+        {/* Carbon Reduction */}
         <StatBox
-          title="Sales Today"
-          value={data && data.todayStats.totalSales}
+          title="Carbon Reduction"
+          value={data && data.carbonReduction}
           increase="+21%"
           description="Since last month"
           icon={
-            <PointOfSale
+            <LocalFlorist
               sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
@@ -140,37 +138,37 @@ const Dashboard = () => {
           p="1rem"
           borderRadius="0.55rem"
         >
-          <OverviewChart view="sales" isDashboard={true} />
+          <OverviewChart view="impact" isDashboard={true} />
         </Box>
 
-        {/* Monthly Sales */}
+        {/* Monthly Impact */}
         <StatBox
-          title="Monthly Sales"
-          value={data && data.thisMonthStats.totalSales}
+          title="Monthly Impact"
+          value={data && data.monthlyImpact}
           increase="+5%"
           description="Since last month"
           icon={
-            <PersonAdd
+            <Assessment
               sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
 
-        {/* Yearly Sales */}
+        {/* Yearly Impact */}
         <StatBox
-          title="Yearly Sales"
-          value={data && data.yearlySalesTotal}
+          title="Yearly Impact"
+          value={data && data.yearlyImpact}
           increase="+43%"
           description="Since last month"
           icon={
-            <Traffic
+            <TrendingUp
               sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
 
         {/* ROW 2 */}
-        {/* Transactions */}
+        {/* Projects */}
         <Box
           gridColumn="span 8"
           gridRow="span 3"
@@ -203,12 +201,12 @@ const Dashboard = () => {
           <DataGrid
             loading={isLoading || !data}
             getRowId={(row) => row._id}
-            rows={(data && data.transactions) || []}
+            rows={(data && data.projects) || []}
             columns={columns}
           />
         </Box>
 
-        {/* Sales by Category */}
+        {/* Impact by Category */}
         <Box
           gridColumn="span 4"
           gridRow="span 3"
@@ -217,7 +215,7 @@ const Dashboard = () => {
           borderRadius="0.55rem"
         >
           <Typography variant="h6" sx={{ color: theme.palette.secondary[100] }}>
-            Sales by Category
+            Impact by Category
           </Typography>
 
           <BreakdownChart isDashboard={true} />
@@ -228,8 +226,7 @@ const Dashboard = () => {
               color: theme.palette.secondary[200],
             }}
           >
-            Breakdown of real states and information via category for revenue
-            made for this year and total sales
+            Breakdown of environmental impact and sustainability initiatives by category
           </Typography>
         </Box>
       </Box>

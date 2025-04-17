@@ -120,7 +120,7 @@ function SustainabilityBacklog() {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState('details');
-  const [importMode, setImportMode] = useState('backlog'); // 'backlog', 'file', or 'manual'
+  const [importMode, setImportMode] = useState('backlog');
   const [manualIssue, setManualIssue] = useState({
     summary: '',
     description: '',
@@ -128,67 +128,51 @@ function SustainabilityBacklog() {
     storyPoints: '',
   });
 
-  const fetchData = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL || "http://localhost:3001"}/api/backlog`, 
-        { withCredentials: true }
-      );
-      
-      if (!response.data || !response.data.issues) {
-        throw new Error('Invalid response format from server');
-      }
-
-      const issues = response.data.issues;
-      setBacklog(issues);
-      setError(null);
-      setApiError(false);
-    } catch (err) {
-      console.error('Error fetching backlog:', err.response?.data || err.message);
-      setError(err.response?.data?.error || err.response?.data?.details || 'Error fetching backlog');
-      setApiError(true);
-    }
-  };
-
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthentication = async () => {
       try {
-        const response = await fetch('http://localhost:3001/auth/check', {
-          credentials: 'include'
-        });
-        const data = await response.json();
-        setAuthenticated(data.authenticated);
-        if (!data.authenticated) {
-          // Store current URL before redirecting
-          const currentPath = window.location.pathname;
-          await fetch('http://localhost:3001/auth/store-url', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ returnTo: currentPath }),
-            credentials: 'include'
-          });
-          window.location.href = 'http://localhost:3001/auth/atlassian';
-        } else {
-          fetchData();
-        }
-      } catch (error) {
-        console.error('Error checking authentication:', error);
-        setError('Failed to check authentication status');
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL || "http://localhost:3001"}/auth/check-auth`, { withCredentials: true });
+        setAuthenticated(response.data.authenticated);
+      } catch (err) {
+        console.error('Error checking authentication:', err);
+        setAuthenticated(false);
+        setApiError(true);
+      } finally {
+        setLoading(false);
       }
     };
 
-    checkAuth();
+    checkAuthentication();
   }, []);
 
   useEffect(() => {
     if (authenticated && backlog.length === 0) {
-      fetchData();
+      const fetchBacklog = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BACKEND_URL || "http://localhost:3001"}/api/backlog`, 
+            { withCredentials: true }
+          );
+          
+          if (!response.data || !response.data.issues) {
+            throw new Error('Invalid response format from server');
+          }
+
+          const issues = response.data.issues;
+          setBacklog(issues);
+          setError(null);
+          setApiError(false);
+        } catch (err) {
+          console.error('Error fetching backlog:', err.response?.data || err.message);
+          setError(err.response?.data?.error || err.response?.data?.details || 'Error fetching backlog');
+          setApiError(true);
+        }
+      };
+
+      fetchBacklog();
     }
   }, [authenticated, backlog.length]);
 
-  // Save to localStorage whenever sustainabilityBacklog changes
   useEffect(() => {
     localStorage.setItem('sustainabilityBacklog', JSON.stringify(sustainabilityBacklog));
   }, [sustainabilityBacklog]);
@@ -279,7 +263,6 @@ function SustainabilityBacklog() {
       const dropIndex = dropTargetIndex !== null ? dropTargetIndex : targetList === 'backlog' ? backlog.length : sustainabilityBacklog.length;
 
       if (sourceList === targetList) {
-        // Reordering within the same list
         const list = sourceList === 'backlog' ? backlog : sustainabilityBacklog;
         const newList = [...list];
         const currentIndex = newList.findIndex(i => i.id === item.id);
@@ -292,7 +275,6 @@ function SustainabilityBacklog() {
           setSustainabilityBacklog(newList);
         }
       } else {
-        // Moving between lists
         if (sourceList === 'backlog' && targetList === 'sustainability') {
           const newBacklog = backlog.filter(i => i.id !== item.id);
           const newSustainability = [...sustainabilityBacklog];
@@ -377,32 +359,27 @@ function SustainabilityBacklog() {
         if (file.name.endsWith('.json')) {
           const parsedContent = JSON.parse(content);
           if (Array.isArray(parsedContent)) {
-            issues = parsedContent.map(item => {
-              // Ensure we have a valid object structure
-              const fields = {
-                summary: String(item.summary || item.fields?.summary || ''),
-                description: String(item.description || item.fields?.description || ''),
+            issues = parsedContent.map(item => ({
+              id: `imported-${Date.now()}-${item.id || Math.random()}`,
+              key: String(item.key || `IMPORT-${Date.now()}`),
+              fields: {
+                summary: String(item.summary || ''),
+                description: String(item.description || ''),
                 priority: {
-                  name: String(item.priority || item.fields?.priority?.name || 'Medium')
+                  name: String(item.priority || 'Medium')
                 },
-                customfield_10016: item.storyPoints || item.fields?.customfield_10016 || null,
+                customfield_10016: item.storyPoints ? parseInt(item.storyPoints) : null,
                 updated: new Date().toISOString()
-              };
-              
-              return {
-                id: `imported-${Date.now()}-${item.id || Math.random()}`,
-                key: String(item.key || `IMPORT-${Date.now()}`),
-                fields
-              };
-            });
-          } else if (typeof parsedContent === 'object') {
+              }
+            }));
+          } else {
             const fields = {
-              summary: String(parsedContent.summary || parsedContent.fields?.summary || ''),
-              description: String(parsedContent.description || parsedContent.fields?.description || ''),
+              summary: String(parsedContent.summary || ''),
+              description: String(parsedContent.description || ''),
               priority: {
-                name: String(parsedContent.priority || parsedContent.fields?.priority?.name || 'Medium')
+                name: String(parsedContent.priority || 'Medium')
               },
-              customfield_10016: parsedContent.storyPoints || parsedContent.fields?.customfield_10016 || null,
+              customfield_10016: parsedContent.storyPoints ? parseInt(parsedContent.storyPoints) : null,
               updated: new Date().toISOString()
             };
             
@@ -641,21 +618,21 @@ function SustainabilityBacklog() {
                       <StyledCard isDragging={draggedItem?.id === issue.id}>
                         <CardContent>
                           <Typography variant="h6" component="h2" gutterBottom>
-                            {issue.fields.summary}
+                            {String(issue.fields?.summary || '')}
                           </Typography>
                           <Typography variant="body2" color="text.secondary" paragraph>
-                            {issue.fields.description || 'No description available'}
+                            {String(issue.fields?.description || 'No description available')}
                           </Typography>
                           <Box sx={{ mb: 2 }}>
                             <Chip
-                              label={`Priority: ${issue.fields.priority.name}`}
-                              color={getPriorityColor(issue.fields.priority.name)}
+                              label={`Priority: ${String(issue.fields?.priority?.name || 'Medium')}`}
+                              color={getPriorityColor(issue.fields?.priority?.name)}
                               size="small"
                               sx={{ mr: 1 }}
                             />
-                            {issue.fields.customfield_10016 && (
+                            {issue.fields?.customfield_10016 && (
                               <Chip
-                                label={`Story Points: ${issue.fields.customfield_10016}`}
+                                label={`Story Points: ${String(issue.fields.customfield_10016)}`}
                                 color="primary"
                                 size="small"
                               />
@@ -765,15 +742,6 @@ function SustainabilityBacklog() {
                     </Box>
                   ))
                 )}
-                <DropZone
-                  key="sustainability-end-zone"
-                  draggable={false}
-                  onDragEnter={(e) => handleDragEnter(e, sustainabilityBacklog.length, 'sustainability')}
-                  onDragLeave={handleDragLeave}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, 'sustainability')}
-                  isDropTarget={dropTargetIndex === sustainabilityBacklog.length && dropTargetList === 'sustainability'}
-                />
               </Paper>
             </Grid>
           </Grid>
@@ -814,7 +782,7 @@ function SustainabilityBacklog() {
                   )}
                 </Box>
                 <Typography variant="body2" color="text.secondary">
-                  Last updated: {new Date(selectedIssue.fields?.updated || Date.now()).toLocaleDateString()}
+                  Last updated: {new Date(selectedIssue.fields?.updated || new Date()).toLocaleDateString()}
                 </Typography>
               </Box>
             </DialogContent>
@@ -826,10 +794,10 @@ function SustainabilityBacklog() {
           </>
         ) : dialogMode === 'import' ? (
           <>
-            <DialogTitle>Add to Active Projects</DialogTitle>
+            <DialogTitle>Add New Sustainability Initiative</DialogTitle>
             <DialogContent>
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ mt: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
                   <Button
                     variant={importMode === 'backlog' ? 'contained' : 'outlined'}
                     onClick={() => setImportMode('backlog')}
@@ -914,7 +882,7 @@ function SustainabilityBacklog() {
                         component="span"
                         startIcon={<UploadIcon />}
                       >
-                        Choose File
+                        Upload File
                       </Button>
                     </label>
                   </Box>
@@ -986,4 +954,4 @@ function SustainabilityBacklog() {
   );
 }
 
-export default SustainabilityBacklog;
+export default SustainabilityBacklog; 

@@ -18,19 +18,18 @@ import {
   ChevronLeft,
   ChevronRightOutlined,
   HomeOutlined,
-  ShoppingCartOutlined,
-  Groups2Outlined,
-  ReceiptLongOutlined,
-  PublicOutlined,
-  PointOfSaleOutlined,
-  TodayOutlined,
-  CalendarMonthOutlined,
-  AdminPanelSettingsOutlined,
-  TrendingUpOutlined,
-  PieChartOutlined,
   NatureOutlined,
   AssessmentOutlined,
+  TrendingUpOutlined,
+  PieChartOutlined,
   SpeedOutlined,
+  LocalFlorist,
+  Eco,
+  DeleteOutline,
+  PowerOutlined,
+  WaterOutlined,
+  AdminPanelSettingsOutlined,
+  ShoppingCartOutlined,
 } from "@mui/icons-material";
 
 import { FlexBetween } from ".";
@@ -43,27 +42,31 @@ const navItems = [
     icon: <HomeOutlined />,
   },
   {
-    text: "Carbon Efficiency",
-    icon: null,
-  },
-  {
-    text: "Products",
+    text: "Sustainability Backlog",
     icon: <NatureOutlined />,
   },
   {
-    text: "Customers",
-    icon: <Groups2Outlined />,
+    text: "Environmental Impact",
+    icon: null,
   },
   {
-    text: "Transactions",
-    icon: <ReceiptLongOutlined />,
+    text: "Carbon Footprint",
+    icon: <LocalFlorist />,
   },
   {
-    text: "Geography",
-    icon: <PublicOutlined />,
+    text: "Energy Efficiency",
+    icon: <PowerOutlined />,
   },
   {
-    text: "Sustainability Efforts",
+    text: "Water Conservation",
+    icon: <WaterOutlined />,
+  },
+  {
+    text: "Waste Management",
+    icon: <DeleteOutline />,
+  },
+  {
+    text: "Sustainability Metrics",
     icon: null,
   },
   {
@@ -71,16 +74,16 @@ const navItems = [
     icon: <AssessmentOutlined />,
   },
   {
-    text: "Daily",
-    icon: <TodayOutlined />,
+    text: "Daily Impact",
+    icon: <TrendingUpOutlined />,
   },
   {
-    text: "Monthly",
-    icon: <CalendarMonthOutlined />,
+    text: "Monthly Report",
+    icon: <PieChartOutlined />,
   },
   {
     text: "Breakdown",
-    icon: <PieChartOutlined />,
+    icon: <SpeedOutlined />,
   },
   {
     text: "Performance",
@@ -89,10 +92,6 @@ const navItems = [
   {
     text: "Admin",
     icon: <AdminPanelSettingsOutlined />,
-  },
-  {
-    text: "Metrics",
-    icon: <SpeedOutlined />,
   },
 ];
 
@@ -181,23 +180,21 @@ const Sidebar = ({
                   );
                 }
 
-                // lowercase text
-                const lcText = text.toLowerCase();
-
                 return (
                   <ListItem key={text} title={text} disablePadding>
                     <ListItemButton
                       onClick={() => {
-                        navigate(`/${lcText}`);
-                        setActive(lcText);
+                        const path = `/${text.toLowerCase().replace(/\s+/g, '-')}`;
+                        navigate(path);
+                        setActive(path.substring(1));
                       }}
                       sx={{
                         backgroundColor:
-                          active === lcText
+                          active === text.toLowerCase().replace(/\s+/g, '-')
                             ? theme.palette.secondary[300]
                             : "transparent",
                         color:
-                          active === lcText
+                          active === text.toLowerCase().replace(/\s+/g, '-')
                             ? theme.palette.primary[600]
                             : theme.palette.secondary[100],
                       }}
@@ -207,7 +204,7 @@ const Sidebar = ({
                         sx={{
                           ml: "2rem",
                           color:
-                            active === lcText
+                            active === text.toLowerCase().replace(/\s+/g, '-')
                               ? theme.palette.primary[600]
                               : theme.palette.secondary[200],
                         }}
@@ -217,7 +214,7 @@ const Sidebar = ({
 
                       {/* text */}
                       <ListItemText primary={text} />
-                      {active === lcText && (
+                      {active === text.toLowerCase().replace(/\s+/g, '-') && (
                         <ChevronRightOutlined sx={{ ml: "auto" }} />
                       )}
                     </ListItemButton>

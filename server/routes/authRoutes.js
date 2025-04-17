@@ -8,7 +8,9 @@ router.get('/atlassian', passport.authenticate('atlassian'));
 // Callback route after successful login
 router.get('/atlassian/callback', passport.authenticate('atlassian', { failureRedirect: '/' }),
     function (req, res) {
-        res.redirect(`${process.env.FRONTEND_URL}/products`);  // Redirect to frontend after successful login
+        const redirectUrl = req.session.returnTo || '/sustainability-backlog';
+        delete req.session.returnTo; 
+        res.redirect(`${process.env.FRONTEND_URL}${redirectUrl}`);
     });
 
 // Route to check authentication status
@@ -29,6 +31,11 @@ router.get('/logout', (req, res) => {
         res.clearCookie('connect.sid');  // Clear the session cookie
         res.send({ message: 'Logged out successfully' });
     });
+});
+
+router.post('/store-url', (req, res) => {
+  req.session.returnTo = req.body.returnTo;
+  res.json({ success: true });
 });
 
 module.exports = router;
