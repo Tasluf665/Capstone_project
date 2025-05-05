@@ -5,7 +5,7 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl:
       process.env.REACT_APP_BASE_URL ||
-      "http://localhost:5001",
+      "http://localhost:3000",
   }), // base url
   reducerPath: "adminApi",
   // tags
@@ -59,7 +59,7 @@ export const api = createApi({
       providesTags: ["Performance"],
     }),
     getDashboard: build.query({
-      query: () => "general/dashboard",
+      query: () => "/api/dashboard",
       providesTags: ["Dashboard"],
     }),
   }),

@@ -110,6 +110,7 @@ function SustainabilityBacklog() {
   });
   const [error, setError] = useState(null);
   const [authenticated, setAuthenticated] = useState(false);
+  console.log('Authenticated:', authenticated);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -150,10 +151,10 @@ function SustainabilityBacklog() {
       const fetchBacklog = async () => {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_BACKEND_URL || "http://localhost:3001"}/api/backlog`, 
+            `${process.env.REACT_APP_BACKEND_URL || "http://localhost:3001"}/api/backlog`,
             { withCredentials: true }
           );
-          
+
           if (!response.data || !response.data.issues) {
             throw new Error('Invalid response format from server');
           }
@@ -256,7 +257,7 @@ function SustainabilityBacklog() {
   const handleDrop = (e, targetList) => {
     if (!isEditing) return;
     e.preventDefault();
-    
+
     try {
       const data = JSON.parse(e.dataTransfer.getData('text/plain'));
       const { item, sourceList } = data;
@@ -268,7 +269,7 @@ function SustainabilityBacklog() {
         const currentIndex = newList.findIndex(i => i.id === item.id);
         newList.splice(currentIndex, 1);
         newList.splice(dropIndex, 0, item);
-        
+
         if (sourceList === 'backlog') {
           setBacklog(newList);
         } else {
@@ -292,7 +293,7 @@ function SustainabilityBacklog() {
     } catch (err) {
       console.error('Error handling drop:', err);
     }
-    
+
     setDraggedItem(null);
     setDropTargetIndex(null);
     setDropTargetList(null);
@@ -382,7 +383,7 @@ function SustainabilityBacklog() {
               customfield_10016: parsedContent.storyPoints ? parseInt(parsedContent.storyPoints) : null,
               updated: new Date().toISOString()
             };
-            
+
             issues = [{
               id: `imported-${Date.now()}-${parsedContent.id || Math.random()}`,
               key: String(parsedContent.key || `IMPORT-${Date.now()}`),
@@ -403,7 +404,7 @@ function SustainabilityBacklog() {
               customfield_10016: values[4] ? parseInt(values[4]) : null,
               updated: new Date().toISOString()
             };
-            
+
             return {
               id: `imported-${Date.now()}-${values[0] || Math.random()}`,
               key: String(values[0] || `IMPORT-${Date.now()}`),
@@ -555,9 +556,9 @@ function SustainabilityBacklog() {
               <Typography variant="body1" gutterBottom>
                 {error}
               </Typography>
-              <Button 
-                variant="contained" 
-                color="error" 
+              <Button
+                variant="contained"
+                color="error"
                 size="small"
                 onClick={() => setError(null)}
               >
@@ -567,7 +568,7 @@ function SustainabilityBacklog() {
           )}
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Paper 
+              <Paper
                 sx={{ p: 2, minHeight: '60vh' }}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, 'backlog')}
@@ -585,7 +586,7 @@ function SustainabilityBacklog() {
                       onDrop={(e) => handleDrop(e, 'backlog')}
                       isDropTarget={dropTargetIndex === index && dropTargetList === 'backlog'}
                     />
-                    <Box 
+                    <Box
                       key={`backlog-${issue.id}-box`}
                       draggable={isEditing}
                       onDragStart={(e) => handleDragStart(e, issue, 'backlog')}
@@ -663,7 +664,7 @@ function SustainabilityBacklog() {
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper 
+              <Paper
                 sx={{ p: 2, minHeight: '60vh' }}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, 'sustainability')}
@@ -684,11 +685,11 @@ function SustainabilityBacklog() {
                   </Button>
                 </Box>
                 {sustainabilityBacklog.length === 0 ? (
-                  <Box 
-                    sx={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center', 
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       height: '50vh',
                       textAlign: 'center',
@@ -704,11 +705,11 @@ function SustainabilityBacklog() {
                   </Box>
                 ) : (
                   sustainabilityBacklog.map((issue) => (
-                    <Box 
-                      key={issue.id} 
-                      sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                    <Box
+                      key={issue.id}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
                         mb: 1,
                         p: 1,
                         border: '1px solid',
@@ -829,11 +830,11 @@ function SustainabilityBacklog() {
                     {backlog.map((issue) => {
                       const isAlreadyAdded = sustainabilityBacklog.some(item => item.id === issue.id);
                       return (
-                        <Box 
-                          key={issue.id} 
-                          sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                        <Box
+                          key={issue.id}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
                             mb: 1,
                             p: 1,
                             border: '1px solid',

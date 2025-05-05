@@ -1,56 +1,43 @@
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 
-import { FlexBetween } from ".";
-
-// Stat Box
-const StatBox = ({ title, value, increase, icon, description }) => {
-  // theme
+const StatBox = ({ title, value, increase, description, icon }) => {
   const theme = useTheme();
+
   return (
     <Box
-      gridColumn="span 2"
-      gridRow="span 1"
-      display="flex"
-      flexDirection="column"
-      justifyContent="space-between"
-      p="1.25rem 1rem"
-      flex="1 1 100%"
+      gridColumn="span 3"
       backgroundColor={theme.palette.background.alt}
+      p="1.5rem"
       borderRadius="0.55rem"
     >
-      <FlexBetween>
-        {/* title */}
-        <Typography variant="h6" sx={{ color: theme.palette.secondary[100] }}>
+      <Box display="flex" justifyContent="space-between">
+        <Box>
+          {icon}
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            sx={{ color: theme.palette.secondary[100] }}
+          >
+            {value}
+          </Typography>
+        </Box>
+      </Box>
+      <Box display="flex" justifyContent="space-between" mt="2px">
+        <Typography variant="h5" sx={{ color: theme.palette.secondary[200] }}>
           {title}
         </Typography>
-
-        {/* icon */}
-        {icon}
-      </FlexBetween>
-
-      {/* value */}
-      <Typography
-        variant="h3"
-        fontWeight="600"
-        sx={{ color: theme.palette.secondary[200] }}
-      >
-        {value}
-      </Typography>
-
-      <FlexBetween gap="1rem">
-        {/* increase % */}
         <Typography
           variant="h5"
           fontStyle="italic"
-          sx={{ color: theme.palette.light }}
+          sx={{ color: theme.palette.secondary.light }}
         >
           {increase}
         </Typography>
-
-        {/* description */}
-        <Typography>{description}</Typography>
-      </FlexBetween>
+      </Box>
+      <Typography mt="1rem" fontSize="0.8rem" sx={{ color: theme.palette.secondary[200] }}>
+        {description}
+      </Typography>
     </Box>
   );
 };

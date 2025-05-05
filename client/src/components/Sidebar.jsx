@@ -46,7 +46,7 @@ const navItems = [
     icon: <NatureOutlined />,
   },
   {
-    text: "Environmental Impact",
+    text: "Sustainability Impact",
     icon: null,
   },
   {
@@ -58,7 +58,7 @@ const navItems = [
     icon: <PowerOutlined />,
   },
   {
-    text: "Water Conservation",
+    text: "Accessibility",
     icon: <WaterOutlined />,
   },
   {
