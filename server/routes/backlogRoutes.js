@@ -5,7 +5,10 @@ const router = express.Router();
 // Route to get sustainability-filtered backlog data
 router.get('/', async (req, res) => {
     if (!req.user) {
-        return res.status(401).send('Not authenticated');
+        return res.status(401).json({
+            error: 'Not authenticated',
+            redirect: '/auth/atlassian',
+        });
     }
 
     const user = req.user;
@@ -57,9 +60,10 @@ router.get('/', async (req, res) => {
             data: err.response.data,
             headers: err.response.headers
         } : err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Error fetching backlog',
-            details: err.response ? err.response.data : err.message
+            details: err.response ? err.response.data : err.message,
+            redirect: '/auth/atlassian',
         });
     }
 });
@@ -115,7 +119,7 @@ router.get('/all', async (req, res) => {
             data: err.response.data,
             headers: err.response.headers
         } : err.message);
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Error fetching all backlog',
             details: err.response ? err.response.data : err.message
         });

@@ -445,7 +445,7 @@ function SustainabilityBacklog() {
     );
   }
 
-  if (!authenticated) {
+  if (!authenticated || apiError) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" flexDirection="column" gap={2}>
         <Typography variant="h5" color="text.secondary">
@@ -458,26 +458,6 @@ function SustainabilityBacklog() {
           startIcon={<LoginIcon />}
         >
           Login
-        </Button>
-      </Box>
-    );
-  }
-
-  if (apiError) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" flexDirection="column" gap={2}>
-        <Typography variant="h5" color="error">
-          Unable to connect to the server
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Please check your connection and try again
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => window.location.reload()}
-        >
-          Retry
         </Button>
       </Box>
     );
