@@ -90,8 +90,6 @@ router.put('/:projectKey/sustainability-backlog', async (req, res) => {
     }
 });
 
-
-
 // New GET route to fetch sustainabilityBacklog for a project
 router.get('/:projectKey/sustainability-backlog', async (req, res) => {
     try {
@@ -108,6 +106,145 @@ router.get('/:projectKey/sustainability-backlog', async (req, res) => {
     } catch (error) {
         console.error('Error fetching sustainability backlog:', error);
         res.status(500).json({ message: 'Server error while fetching sustainability backlog' });
+    }
+});
+
+// Route to download sustainability backlog report as JSON
+router.get('/:projectKey/download-report', async (req, res) => {
+    try {
+        const { projectKey } = req.params;
+        // Find the project
+        const project = await Project.findOne({ 'jiraProject.key': projectKey });
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+        const backlog = project.sustainabilityBacklog || [];
+        // Deduplicate tasks by id
+        const uniqueTasks = [];
+        const seenIds = new Set();
+        for (const item of backlog) {
+            if (!seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueTasks.push(item);
+            }
+        }
+        // Total story points
+        const totalStoryPoints = uniqueTasks.reduce((total, item) => {
+            const storyPoints = item.fields.customfield_10016 || 0;
+            return total + storyPoints;
+        }, 0);
+        // Total unique tasks
+        const totalSustainabilityBacklog = uniqueTasks.length;
+        // Priority distribution
+        const priorityCounts = uniqueTasks.reduce((acc, item) => {
+            const priority = item.fields.priority?.name || 'Unknown';
+            acc[priority] = (acc[priority] || 0) + 1;
+            return acc;
+        }, {});
+        // Recently updated (last 7 days, EEST)
+        const currentDate = new Date(Date.now());
+        currentDate.setUTCHours(currentDate.getUTCHours() + 3); // EEST (UTC+3)
+        const daysDifference = (date1, date2) => Math.floor((date1 - date2) / (1000 * 60 * 60 * 24));
+        const recentlyUpdated = uniqueTasks.filter((item) => {
+            const updatedDate = new Date(item.fields.updated);
+            return daysDifference(currentDate, updatedDate) <= 7;
+        }).length;
+        // Average story points per task
+        const avgStoryPoints = totalSustainabilityBacklog > 0 ? (totalStoryPoints / totalSustainabilityBacklog).toFixed(1) : 0;
+        // Prepare report
+        const report = {
+            title: 'Project Dashboard Report',
+            date: new Date().toLocaleDateString(),
+            project: project.projectName,
+            metrics: {
+                totalStoryPoints,
+                totalSustainabilityBacklog,
+                recentlyUpdated,
+                avgStoryPoints,
+                priorityDistribution: priorityCounts,
+            },
+        };
+        // Send as downloadable JSON file
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=project-dashboard-report.json');
+        res.send(JSON.stringify(report, null, 2));
+    } catch (error) {
+        console.error('Error generating report:', error);
+        res.status(500).json({ message: 'Server error while generating report' });
+    }
+});
+
+// Route to download a single aggregated report for all projects
+router.get('/download-all-reports', async (req, res) => {
+    try {
+        const projects = await Project.find();
+        let totalStoryPoints = 0;
+        let totalSustainabilityBacklog = 0;
+        let recentlyUpdated = 0;
+        let totalAvgStoryPoints = 0;
+        let avgStoryPointsCount = 0;
+        const priorityDistribution = {};
+
+        const currentDate = new Date(Date.now());
+        currentDate.setUTCHours(currentDate.getUTCHours() + 3); // EEST (UTC+3)
+        const daysDifference = (date1, date2) => Math.floor((date1 - date2) / (1000 * 60 * 60 * 24));
+
+        projects.forEach(project => {
+            const backlog = project.sustainabilityBacklog || [];
+            // Deduplicate tasks by id
+            const uniqueTasks = [];
+            const seenIds = new Set();
+            for (const item of backlog) {
+                if (!seenIds.has(item.id)) {
+                    seenIds.add(item.id);
+                    uniqueTasks.push(item);
+                }
+            }
+            // Total story points for this project
+            const projectStoryPoints = uniqueTasks.reduce((total, item) => {
+                const storyPoints = item.fields.customfield_10016 || 0;
+                return total + storyPoints;
+            }, 0);
+            totalStoryPoints += projectStoryPoints;
+            // Total unique tasks for this project
+            totalSustainabilityBacklog += uniqueTasks.length;
+            // Priority distribution
+            uniqueTasks.forEach(item => {
+                const priority = item.fields.priority?.name || 'Unknown';
+                priorityDistribution[priority] = (priorityDistribution[priority] || 0) + 1;
+            });
+            // Recently updated (last 7 days, EEST)
+            recentlyUpdated += uniqueTasks.filter((item) => {
+                const updatedDate = new Date(item.fields.updated);
+                return daysDifference(currentDate, updatedDate) <= 7;
+            }).length;
+            // Average story points for this project
+            if (uniqueTasks.length > 0) {
+                totalAvgStoryPoints += projectStoryPoints / uniqueTasks.length;
+                avgStoryPointsCount++;
+            }
+        });
+        // Calculate overall average story points per task
+        const avgStoryPoints = avgStoryPointsCount > 0 ? (totalAvgStoryPoints / avgStoryPointsCount).toFixed(1) : 0;
+        // Prepare aggregated report
+        const report = {
+            title: 'All Projects Dashboard Report',
+            date: new Date().toLocaleDateString(),
+            metrics: {
+                totalStoryPoints,
+                totalSustainabilityBacklog,
+                recentlyUpdated,
+                avgStoryPoints,
+                priorityDistribution,
+            },
+        };
+        // Send as downloadable JSON file
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename=all-projects-dashboard-report.json');
+        res.send(JSON.stringify(report, null, 2));
+    } catch (error) {
+        console.error('Error generating all projects report:', error);
+        res.status(500).json({ message: 'Server error while generating all projects report' });
     }
 });
 

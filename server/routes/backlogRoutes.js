@@ -81,7 +81,35 @@ router.get("/projects", async (req, res) => {
   }
 });
 
-// Route to get sustainability-filtered backlog data for a specific project
+// Agent - Route to list all accessible projects. This route is temporary. List of projects will be provided by the Abdul agents.
+router.get("/agent/projects", async (req, res) => {
+  try {
+    const projects = {
+      "projects": [
+        {
+          "id": "10000",
+          "key": "SCRUM",
+          "name": "Elisa Visualization Dashboard"
+        },
+        {
+          "id": "10033",
+          "key": "TP",
+          "name": "Testing Project"
+        }
+      ]
+    }
+    res.json(projects);
+  } catch (err) {
+    console.error("Error fetching projects:", err.message);
+    res.status(500).json({
+      error: "Error fetching projects",
+      details: err.message,
+      redirect: "/auth/atlassian",
+    });
+  }
+});
+
+// Route to get all the backlog data for a specific project
 router.get("/", async (req, res) => {
   if (!req.user) {
     return res.status(401).json({

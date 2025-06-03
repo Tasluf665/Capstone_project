@@ -107,29 +107,26 @@ const ProjectDashboard = ({ projectKey }) => {
         };
     }, [selectedProject]);
 
-    const handleDownload = () => {
-        const report = {
-            title: "Project Dashboard Report",
-            date: new Date().toLocaleDateString(),
-            project: selectedProject?.projectName,
-            metrics: {
-                totalStoryPoints: metrics.totalStoryPoints,
-                totalSustainabilityBacklog: metrics.totalSustainabilityBacklog,
-                recentlyUpdated: metrics.recentlyUpdated,
-                avgStoryPoints: metrics.avgStoryPoints,
-                priorityDistribution: metrics.priorityCounts,
-            },
-        };
-
-        const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'project-dashboard-report.json';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL || "http://localhost:3001"}/api/project/${projectKey}/download-report`, {
+                method: 'GET',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to download report');
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'project-dashboard-report.json';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            alert('Error downloading report: ' + error.message);
+        }
     };
 
     if (loading || backlogLoading) {
