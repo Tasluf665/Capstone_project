@@ -1,0 +1,31 @@
+Server deployment
+- https://www.youtube.com/watch?v=ofBFl4M4BFk
+- https://gist.github.com/piyushgarg-dev/8b14c87c8ff4d626ecbc747b6b9fc57f
+- https://www.youtube.com/watch?v=sT-BLJSU7Z0
+- https://www.youtube.com/watch?v=BnWfbv7Fy-k
+
+Atlassian devepoler console
+- https://developer.atlassian.com/console/myapps/
+
+Domain
+- https://www.spaceship.com/application
+
+AWS EC2
+- https://eu-north-1.console.aws.amazon.com/ec2/home
+
+Cookies does not send plm:
+The main plm is in the NGINX. NGINX does not send the cookies to backend. This config in the NGINX solve the issue:
+location / {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+
+
+    
