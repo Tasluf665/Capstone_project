@@ -634,12 +634,10 @@ const KnowledgeSharing = () => {
                     <IconButton onClick={() => handleShare(post)}>
                       <Share />
                     </IconButton>
-                    {post.uid == user.id && (
-                      <>
-                        <IconButton onClick={() => handleDelete(post._id)}>
-                          <Delete />
-                        </IconButton>
-                      </>
+                    {(post.uid === user.id || user.role === "admin") && (
+                      <IconButton onClick={() => handleDelete(post._id)}>
+                        <Delete />
+                      </IconButton>
                     )}
                   </Box>
                 </Box>
@@ -692,7 +690,7 @@ const KnowledgeSharing = () => {
                               {comment.name} {comment.last_name}
                             </Typography>
                           </Tooltip>
-                          {comment.uid === user.id && (
+                          {(post.uid === user.id || user.role === "admin") && (
                             <IconButton
                               size="small"
                               onClick={() =>
@@ -734,7 +732,10 @@ const KnowledgeSharing = () => {
                     <Box
                       component="img"
                       alt="profile"
-                      src={user.photo || 'https://upload.wikimedia.org/wikipedia/commons/8/83/Default-Icon.jpg'}
+                      src={
+                        user.photo ||
+                        "https://upload.wikimedia.org/wikipedia/commons/8/83/Default-Icon.jpg"
+                      }
                       height="42px"
                       width="52px"
                       borderRadius="50%"

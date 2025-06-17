@@ -14,7 +14,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const userRoutes = require('./routes/userRoutes');
 const socialRoutes = require('./routes/posts');
-
+const systemRoutes = require('./routes/system'); // Import system routes if needed
 const app = express();
 
 app.set('trust proxy', 1);
@@ -60,11 +60,33 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/project", projectRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/social", socialRoutes); // Social media routes
+app.use("/api/system", systemRoutes); // System routes (if needed)
 
 // Test route
 app.get('/api/test', (req, res) => {
     res.json({ message: 'API is working!' });
 });
+
+
+//! NOTA: Modificar manualmente el rol de los usuarios que necesiten ser admins en la DB.
+
+/*
+Esto fue una actualización para que todos los usuarios tengan el rol de "user" en la base de datos, solo se debe ejecutar una vez, no es necesario tenerlo en producción ya que este endpoint solo actualizo los usuarios viejos, los nuevos usuarios se crean con el rol de "user" por defecto.
+
+
+const User = require('./models/user');
+app.get("/sys/root", async (req, res) => {
+   //set all users role to "user"
+    try {
+        await User.updateMany({}, { role: 'user' });
+
+
+    } catch (error) {
+        console.error('Error updating user roles:', error);
+        return res.status(500).json({ message: 'Error updating user roles' });
+    }
+    res.json({ message: 'All users have been set to role "user"' });
+});*/
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })

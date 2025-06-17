@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const { jwtDecode } = require('jwt-decode');
 const bcrypt = require('bcrypt');
 
 router.post('/auth/signup', async (req, res) => {
@@ -72,10 +73,28 @@ router.post('/auth/login', async (req, res) => {
             name: user.name,
             lastName: user.lastName,
             email: user.email,
-            department: user.department
+            department: user.department,
+            role: user.role || 'user', // default role is 'user'
         }
     });
 });
 
+router.get('/auth/users', async (req, res) => {
+    try{
+        const token = jwtDecode(req.headers.authorization?.split(' ')[1]);
+        const user = await User.findById(token.id);
+
+        // Validate user an role
+        if (!user) res.status(404).json({ message: 'User not found' });
+        if (user.role !== 'admin') res.status(403).json({ message: 'Forbidden: Admin access required' });
+
+        const users = await User.find({}, '-password -__v'); // Exclude password field and __v field
+        res.status(200).json(users);
+
+    }catch (error) {
+        console.error('Error in /api/auth/users route:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+})
 
 module.exports = router;

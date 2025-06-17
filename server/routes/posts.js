@@ -83,8 +83,11 @@ router.delete('/:id', async (req, res) => {
         if (!token) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
+
+        const requester = await User.findById(jwtDecode(token).id)
+
         const decodedToken = jwtDecode(token);
-        if (decodedToken.id !== post.uid.toString()) {
+        if (decodedToken.id !== post.uid.toString() && requester.role !== 'admin') {
             return res.status(403).json({ message: 'Forbidden' });
         }
 
@@ -199,9 +202,11 @@ router.delete('/comment/:postId/:commentId', async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
+        const requester = await User.findById(decodedToken.id)
+
         // Find the comment to delete
         const commentIndex = post.comments.findIndex(comment => comment.get('_id').toString() === commentId.toString() && comment.get('uid') === userId.toString());
-        if (commentIndex === -1) {
+        if (commentIndex === -1 && requester.role !== 'admin') {
             return res.status(404).json({ message: 'Comment not found or unauthorized' });
         }
         // Remove the comment from the post
