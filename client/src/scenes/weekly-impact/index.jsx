@@ -18,7 +18,7 @@ import useBacklog from "../../hooks/useBacklog";
 const parseDate = (dateStr) => new Date(dateStr);
 const daysDifference = (date1, date2) => Math.floor((date1 - date2) / (1000 * 60 * 60 * 24));
 
-const MonthlyReport = () => {
+const WeeklyImpact = () => {
   const theme = useTheme();
   const { authenticated, loading: authLoading } = useAuth();
   const { userProjects, loading: backlogLoading } = useBacklog(authenticated);
@@ -42,69 +42,70 @@ const MonthlyReport = () => {
       }
     }
 
-    // Filter uniqueTasks for tasks updated in the current month
+    // Filter uniqueTasks for tasks updated in the current week
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    const uniqueTasksThisMonth = uniqueTasks.filter(item => {
+    const dayOfWeek = now.getDay();
+    const diffToMonday = (dayOfWeek + 6) % 7;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - diffToMonday);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+    weekEnd.setHours(0, 0, 0, 0);
+
+    const uniqueTasksThisWeek = uniqueTasks.filter(item => {
       const updatedDate = parseDate(item.fields.updated);
-      return (
-        updatedDate.getMonth() === currentMonth &&
-        updatedDate.getFullYear() === currentYear
-      );
+      return updatedDate >= weekStart && updatedDate < weekEnd;
     });
 
-    // Total story points across all projects (for current month)
-    const totalStoryPoints = uniqueTasksThisMonth.reduce((total, item) => {
+    // Total story points across all projects (for current week)
+    const totalStoryPoints = uniqueTasksThisWeek.reduce((total, item) => {
       const storyPoints = item.fields.customfield_10016 || 0;
       return total + storyPoints;
     }, 0);
 
-    // Total unique tasks across all projects (for current month)
-    const totalSustainabilityBacklog = uniqueTasksThisMonth.length;
+    // Total unique tasks across all projects (for current week)
+    const totalSustainabilityBacklog = uniqueTasksThisWeek.length;
 
-    // Priority distribution across all projects (for current month)
-    const priorityCounts = uniqueTasksThisMonth.reduce((acc, item) => {
+    // Priority distribution across all projects (for current week)
+    const priorityCounts = uniqueTasksThisWeek.reduce((acc, item) => {
       const priority = item.fields.priority.name;
       acc[priority] = (acc[priority] || 0) + 1;
       return acc;
     }, {});
 
-    // Recently updated tasks (within last 7 days, for current month)
+    // Recently updated tasks (within last 7 days, for current week)
     const currentDate = new Date(Date.now());
     currentDate.setUTCHours(currentDate.getUTCHours() + 3); // Adjust to EEST (UTC+3)
-    const recentlyUpdated = uniqueTasksThisMonth.filter((item) => {
+    const recentlyUpdated = uniqueTasksThisWeek.filter((item) => {
       const updatedDate = parseDate(item.fields.updated);
       return daysDifference(currentDate, updatedDate) <= 7;
     }).length;
 
-    // Task updates over time (group by week, for current month)
-    function getISOWeekAndYear(date) {
-      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-      const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-      return { week: weekNum, year: d.getUTCFullYear() };
+    // Task updates over time (group by day, for current week)
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const daysOfWeek = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(weekStart);
+      day.setDate(weekStart.getDate() + i);
+      day.setHours(0, 0, 0, 0);
+      daysOfWeek.push(day);
     }
 
-    const updatesByWeek = uniqueTasksThisMonth.reduce((acc, item) => {
-      const updatedDate = parseDate(item.fields.updated);
-      const { week, year } = getISOWeekAndYear(updatedDate);
-      const weekLabel = `W${week} ${year}`;
-      acc[weekLabel] = (acc[weekLabel] || 0) + 1;
-      return acc;
-    }, {});
+    const updatesByDay = daysOfWeek.map((day, idx) => {
+      const nextDay = new Date(day);
+      nextDay.setDate(day.getDate() + 1);
+      const count = uniqueTasksThisWeek.filter(item => {
+        const updatedDate = parseDate(item.fields.updated);
+        return updatedDate >= day && updatedDate < nextDay;
+      }).length;
+      return { x: dayLabels[idx], y: count };
+    });
 
-    const updateTrendData = Object.entries(updatesByWeek)
-      .map(([week, count]) => ({ x: week, y: count }))
-      .sort((a, b) => {
-        const [aW, aY] = a.x.split(' ');
-        const [bW, bY] = b.x.split(' ');
-        return aY === bY ? parseInt(aW.slice(1)) - parseInt(bW.slice(1)) : parseInt(aY) - parseInt(bY);
-      });
+    const updateTrendData = updatesByDay;
 
-    // Priority distribution for pie chart (for current month)
+    // Priority distribution for pie chart (for current week)
     const priorityDistributionData = Object.entries(priorityCounts).map(([priority, count]) => ({
       id: priority,
       label: priority,
@@ -118,7 +119,7 @@ const MonthlyReport = () => {
       recentlyUpdated,
       updateTrendData: [{ id: "Updates", data: updateTrendData }],
       priorityDistributionData,
-      uniqueTasks: uniqueTasksThisMonth,
+      uniqueTasks: uniqueTasksThisWeek,
     };
   }, [userProjects]);
 
@@ -157,7 +158,7 @@ const MonthlyReport = () => {
       <FlexBetween>
         <Header
           title="SUSTAINABILITY DASHBOARD"
-          subtitle="Track Efforts for the Current Month"
+          subtitle="Track Efforts for the Current Week"
         />
         <Button
           onClick={handleDownload}
@@ -208,4 +209,4 @@ const MonthlyReport = () => {
   );
 };
 
-export default MonthlyReport;
+export default WeeklyImpact;

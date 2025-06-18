@@ -74,7 +74,7 @@ const navItems = [
     icon: <AssessmentOutlined />,
   },
   {
-    text: "Daily Impact",
+    text: "Weekly Impact",
     icon: <TrendingUpOutlined />,
   },
   {

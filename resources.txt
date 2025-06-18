@@ -12,6 +12,10 @@ Domain
 
 AWS EC2
 - https://eu-north-1.console.aws.amazon.com/ec2/home
+- ssh -i "capstone.pem" ubuntu@ec2-51-20-164-60.eu-north-1.compute.amazonaws.com
+- pm2 status
+- pm2 restart jira-backlog
+- pm2 logs
 
 Cookies does not send plm:
 The main plm is in the NGINX. NGINX does not send the cookies to backend. This config in the NGINX solve the issue:

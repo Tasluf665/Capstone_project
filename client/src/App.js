@@ -11,7 +11,7 @@ import {
   EnergyEfficiency,
   WaterConservation,
   WasteManagement,
-  DailyImpact,
+  WeeklyImpact,
   MonthlyReport,
   SustainabilityBacklogIndex, // Your main component
   KnowledgeSharing,
@@ -118,10 +118,10 @@ function App() {
                 />
               )}
               <Route
-                path="/daily-impact"
+                path="/weekly-impact"
                 element={
                   <ProtectedRoute>
-                    <DailyImpact />
+                    <WeeklyImpact />
                   </ProtectedRoute>
                 }
               />
