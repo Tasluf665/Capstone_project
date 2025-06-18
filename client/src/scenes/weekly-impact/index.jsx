@@ -123,26 +123,27 @@ const WeeklyImpact = () => {
     };
   }, [userProjects]);
 
-  const handleDownload = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL || "http://localhost:3001"}/api/project/download-all-reports`, {
-        method: 'GET',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to download report');
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'project-dashboard-report.json';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      alert('Error downloading report: ' + error.message);
-    }
+  const handleDownload = () => {
+    const report = {
+      title: "Sustainability Report",
+      date: new Date().toLocaleDateString(),
+      metrics: {
+        totalStoryPoints: metrics.totalStoryPoints,
+        totalSustainabilityBacklog: metrics.totalSustainabilityBacklog,
+        recentlyUpdated: metrics.recentlyUpdated,
+        priorityDistribution: metrics.priorityDistributionData,
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sustainability-report.json';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   };
 
   if (authLoading || backlogLoading) {
