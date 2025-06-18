@@ -48,31 +48,32 @@ const navItems = [
     text: "Sustainability Backlog",
     icon: <NatureOutlined />,
   },
+  // {
+  //   text: "Sustainability Impact",
+  //   icon: null,
+  // },
+  // {
+  //   text: "Carbon Footprint",
+  //   icon: <LocalFlorist />,
+  // },
+  // {
+  //   text: "Energy Efficiency",
+  //   icon: <PowerOutlined />,
+  // },
+
   {
-    text: "Sustainability Impact",
+    text: "Sustainability Metrics",
     icon: null,
-  },
-  {
-    text: "Carbon Footprint",
-    icon: <LocalFlorist />,
-  },
-  {
-    text: "Energy Efficiency",
-    icon: <PowerOutlined />,
   },
   {
     text: "Admin Settings",
     icon: <DeleteOutline />,
     requireAdmin: true,
   },
-  {
-    text: "Sustainability Metrics",
-    icon: null,
-  },
-  {
-    text: "Overview",
-    icon: <AssessmentOutlined />,
-  },
+  // {
+  //   text: "Overview",
+  //   icon: <AssessmentOutlined />,
+  // },
   {
     text: "Weekly Impact",
     icon: <TrendingUpOutlined />,
@@ -81,10 +82,10 @@ const navItems = [
     text: "Monthly Report",
     icon: <PieChartOutlined />,
   },
-  {
-    text: "Breakdown",
-    icon: <SpeedOutlined />,
-  },
+  // {
+  //   text: "Breakdown",
+  //   icon: <SpeedOutlined />,
+  // },
   {
     text: "Guidelines",
     icon: null,
@@ -228,7 +229,7 @@ const Sidebar = ({
           </Box>
 
           {/* User */}
-          <Box pb="1rem">
+          {/* <Box pb="1rem">
             <Divider />
             <FlexBetween textTransform="none" gap="1rem" m="1.5rem 2rem 0 3rem">
               <Box
@@ -259,7 +260,7 @@ const Sidebar = ({
                 sx={{ color: theme.palette.secondary[300], fontSize: "25px" }}
               />
             </FlexBetween>
-          </Box>
+          </Box> */}
         </Drawer>
       )}
     </Box>

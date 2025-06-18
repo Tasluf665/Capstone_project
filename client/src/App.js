@@ -7,8 +7,6 @@ import { themeSettings } from "./theme";
 import {
   DashboardIndex,
   Layout,
-  CarbonFootprint,
-  EnergyEfficiency,
   WaterConservation,
   WasteManagement,
   WeeklyImpact,
@@ -83,22 +81,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
+              {/* <Route
                 path="/carbon-footprint"
                 element={
                   <ProtectedRoute>
                     <CarbonFootprint />
                   </ProtectedRoute>
                 }
-              />
-              <Route
+              /> */}
+              {/* <Route
                 path="/energy-efficiency"
                 element={
                   <ProtectedRoute>
                     <EnergyEfficiency />
                   </ProtectedRoute>
                 }
-              />
+              /> */}
               <Route
                 path="/water-conservation"
                 element={

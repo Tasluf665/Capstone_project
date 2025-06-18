@@ -176,11 +176,11 @@ const Navbar = ({ user, isSidebarOpen, setIsSidebarOpen }) => {
           )}
 
           {/* Settings */}
-          {!isFocusModeActive && (
+          {/* {!isFocusModeActive && (
             <IconButton title="Setting">
               <SettingsOutlined sx={{ fontSize: "25px" }} />
             </IconButton>
-          )}
+          )} */}
 
           {/* User */}
           {!isFocusModeActive && (
