@@ -19,7 +19,7 @@ import {
   AuthScreen,
 } from "scenes";
 import secureLocalStorage from "react-secure-storage";
-import { setUser, $user } from "store/user";
+import { setUser, $user, isAdmin } from "store/user";
 import { setStoryPoints } from "store/storyPoints";
 import { useStore } from "@nanostores/react";
 import ProtectedRoute from "ProtectedRoutes";
@@ -107,14 +107,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/waste-management"
-                element={
-                  <ProtectedRoute>
-                    <WasteManagement />
-                  </ProtectedRoute>
-                }
-              />
+              {isAdmin() && (
+                <Route
+                  path="/admin-settings"
+                  element={
+                    <ProtectedRoute>
+                      <WasteManagement />
+                    </ProtectedRoute>
+                  }
+                />
+              )}
               <Route
                 path="/daily-impact"
                 element={
@@ -173,6 +175,10 @@ function App() {
               />
             </Route>
             <Route path="/" element={<AuthScreen />} />
+            <Route
+              path="*"
+              element={<Navigate to="/dashboard" replace />}
+            />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>

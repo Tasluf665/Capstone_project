@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Container, Box, Typography, Button, useTheme } from '@mui/material';
 import { Edit as EditIcon } from '@mui/icons-material';
 import SustainabilityAppBar from '../../components/sustainabilityBacklog/SustainabilityAppBar';
@@ -16,7 +16,7 @@ function SustainabilityBacklog({ projectKey }) {
     const navigate = useNavigate();
     const { authenticated, loading, apiError, handleLogin, handleLogout } = useAuth();
     const { backlog, setBacklog, error, setError, loading: backlogLoading, selectedProject } = useBacklog(authenticated, projectKey);
-    console.log("backlog", backlog);
+    //console.log("backlog", backlog);
     const {
         sustainabilityBacklog,
         isEditing,

@@ -218,6 +218,18 @@ const ImportDialog = ({
                                         margin="normal"
                                         type="number"
                                     />
+                                    <TextField
+                                        fullWidth
+                                        label="Labels (comma separated)"
+                                        value={manualIssue.labels}
+                                        onChange={(e) => setManualIssue({ ...manualIssue, labels: e.target.value.split(',').map(label => label.trim()) })}
+                                        margin="normal"
+                                        sx={{
+                                            '& .MuiInputBase-input': {
+                                                backgroundColor: 'transparent',
+                                            },
+                                        }}
+                                    />
                                     <Button
                                         variant="contained"
                                         color="primary"

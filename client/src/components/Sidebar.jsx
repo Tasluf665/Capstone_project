@@ -31,9 +31,12 @@ import {
   AdminPanelSettingsOutlined,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
+import { isAdmin } from 'store/user';
+
 
 import { FlexBetween } from ".";
 import profileImage from "assets/profile.jpeg";
+;
 
 // Nav items
 const navItems = [
@@ -58,8 +61,9 @@ const navItems = [
     icon: <PowerOutlined />,
   },
   {
-    text: "Waste Management",
+    text: "Admin Settings",
     icon: <DeleteOutline />,
+    requireAdmin: true,
   },
   {
     text: "Sustainability Metrics",
@@ -104,7 +108,6 @@ const Sidebar = ({
   const [active, setActive] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
-
   // set active path
   useEffect(() => {
     setActive(pathname.substring(1));
@@ -167,7 +170,8 @@ const Sidebar = ({
 
             {/* Sidebar items */}
             <List>
-              {navItems.map(({ text, icon }) => {
+              {navItems.map((item, index) => { // ( {text, icon} )
+                const { text, icon } = item;
                 if (!icon) {
                   return (
                     <Typography key={text} sx={{ m: "2.25rem 0 1rem 3rem" }}>
@@ -177,7 +181,10 @@ const Sidebar = ({
                 }
 
                 return (
-                  <ListItem key={text} title={text} disablePadding>
+                  <ListItem key={index} title={text} disablePadding sx={{
+                    // only allow when user is admin otherwise hide the item
+                    display: item.requireAdmin && !isAdmin() ? 'none' : 'block'
+                  }}>
                     <ListItemButton
                       onClick={() => {
                         const path = `/${text.toLowerCase().replace(/\s+/g, '-')}`;
@@ -207,12 +214,12 @@ const Sidebar = ({
                       >
                         {icon}
                       </ListItemIcon>
-
                       {/* text */}
                       <ListItemText primary={text} />
                       {active === text.toLowerCase().replace(/\s+/g, '-') && (
                         <ChevronRightOutlined sx={{ ml: "auto" }} />
                       )}
+
                     </ListItemButton>
                   </ListItem>
                 );

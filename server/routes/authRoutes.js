@@ -117,6 +117,7 @@ router.get("/google/callback", (req, res) => {
                   lastName: user.lastName,
                   email: user.email,
                   photo: user.photo,
+                  role: user.role || "user", // Default to 'user' if role is not set
                 },
               }, SECRET);
               res.redirect(
